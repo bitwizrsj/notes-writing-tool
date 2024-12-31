@@ -89,7 +89,51 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(createNoteCommand);
+    const quickNoteCommand = vscode.commands.registerCommand('notes.quickNote', async () => {
+        const quickNoteContent = await vscode.window.showInputBox({
+            prompt: 'Enter quick note content:',
+            placeHolder: 'Quick note...'
+        });
+
+        if (!quickNoteContent) {
+            vscode.window.showWarningMessage('Quick note canceled. No content provided.');
+            return;
+        }
+
+        const filePath = path.join(notesFolder, `quick-note-${Date.now()}.txt`);
+        try {
+            fs.writeFileSync(filePath, quickNoteContent, 'utf8');
+            vscode.window.showInformationMessage(`Quick note saved to: ${filePath}`);
+            notesProvider.refresh();
+        } catch (error) {
+            vscode.window.showErrorMessage('Failed to save quick note.');
+        }
+    });
+
+    const searchNotesCommand = vscode.commands.registerCommand('notes.searchNotes', async () => {
+        const searchTerm = await vscode.window.showInputBox({
+            prompt: 'Enter search term:',
+            placeHolder: 'Search notes...'
+        });
+
+        if (!searchTerm) {
+            vscode.window.showWarningMessage('Search canceled. No term provided.');
+            return;
+        }
+
+        const matchingNotes = fs.readdirSync(notesFolder)
+            .filter(file => file.includes(searchTerm));
+
+        if (matchingNotes.length === 0) {
+            vscode.window.showInformationMessage('No matching notes found.');
+        } else {
+            vscode.window.showQuickPick(matchingNotes.map(name => ({ label: name })), {
+                placeHolder: 'Matching notes:'
+            });
+        }
+    });
+
+    context.subscriptions.push(createNoteCommand, quickNoteCommand, searchNotesCommand);
 }
 
 export function deactivate() {}

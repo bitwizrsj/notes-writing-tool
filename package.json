@@ -16,7 +16,15 @@
       {
         "command": "notes.createNote",
         "title": "Create a New Note"
-    }   
+    },
+    {
+        "command": "notes.quickNote",
+        "title": "Quick Note"
+    },
+    {
+        "command": "notes.searchNotes",
+        "title": "Search Notes"
+    }
     ],
     "views": {
         "explorer": [
